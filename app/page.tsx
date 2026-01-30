@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { Heart, Sparkles } from "lucide-react"
 import { CountdownTimer } from "@/components/countdown-timer"
-import { ReasonsILoveYou } from "@/components/reasons-i-love-you"
 import { LoveQuiz } from "@/components/love-quiz"
 import { RingBoxIntro } from "@/components/ring-box-intro"
 import { ValentineJourney } from "@/components/valentine-journey"
@@ -100,26 +99,6 @@ export default function AnniversaryPage() {
             </h2>
             <p className="text-muted-foreground mb-10">Counting down the moments until we celebrate our beautiful journey</p>
             <CountdownTimer targetDate={anniversaryDate} />
-          </div>
-        </section>
-
-        {/* Reasons I Love You Section */}
-        <section className="py-16 px-4">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="flex justify-center items-center gap-3 mb-4">
-                <div className="h-px w-8 bg-primary/30" />
-                <Heart className="w-5 h-5 text-primary" fill="currentColor" />
-                <div className="h-px w-8 bg-primary/30" />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Complete My Love Letter
-              </h2>
-              <p className="text-muted-foreground">
-                Choose the right words to complete the letter I wrote for you
-              </p>
-            </div>
-            <ReasonsILoveYou />
           </div>
         </section>
 
