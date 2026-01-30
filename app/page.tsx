@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Heart, Sparkles } from "lucide-react"
 import { CountdownTimer } from "@/components/countdown-timer"
-import { PhotoGallery } from "@/components/photo-gallery"
+import { ReasonsILoveYou } from "@/components/reasons-i-love-you"
 import { LoveQuiz } from "@/components/love-quiz"
 import { RingBoxIntro } from "@/components/ring-box-intro"
 
@@ -102,9 +102,9 @@ export default function AnniversaryPage() {
           </div>
         </section>
 
-        {/* Photo Gallery Section */}
+        {/* Reasons I Love You Section */}
         <section className="py-16 px-4">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
               <div className="flex justify-center items-center gap-3 mb-4">
                 <div className="h-px w-8 bg-primary/30" />
@@ -112,13 +112,13 @@ export default function AnniversaryPage() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Moments Frozen in Time
+                Why I Fell In Love With You
               </h2>
               <p className="text-muted-foreground">
-                Each photograph holds a piece of our heart, a chapter of our love story
+                A collection of moments and reasons that made my heart forever yours
               </p>
             </div>
-            <PhotoGallery />
+            <ReasonsILoveYou />
           </div>
         </section>
 
