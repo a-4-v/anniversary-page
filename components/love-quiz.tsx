@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, Sparkles, Check, X } from "lucide-react"
+import { Heart, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -9,11 +9,7 @@ interface Question {
   id: number
   question: string
   options: string[]
-  correctAnswer: number
-  funnyResponse: {
-    correct: string
-    wrong: string
-  }
+  emojis: string[]
 }
 
 const questions: Question[] = [
@@ -26,26 +22,18 @@ const questions: Question[] = [
       "Itna pyaar feel hota hai jo words mein nahi aa sakta",
       "Jaise sab kuch finally sahi ho gaya",
     ],
-    correctAnswer: 1,
-    funnyResponse: {
-      correct: "Mujhe pata tha! 1,825 din baad bhi main tumhare dil ki dhadkan hoon!",
-      wrong: "Sab feelings sahi hain, par maan lo... tumhara dil abhi bhi mujhe dekh ke skip karta hai!",
-    },
+    emojis: ["🏠💕", "💓💗", "🥰💖", "✨💫"],
   },
   {
     id: 2,
     question: "Kis moment mein tumhe sabse zyada mera pyaar feel hota hai?",
     options: [
-      "Jab tum mujhe bina kuch bole sirf gale laga lete ho",
-      "Jab tum meri choti choti baatein yaad rakhte ho",
-      "Jab tum mujhe aise dekhte ho jaise main tumhari poori duniya hoon",
-      "Jab tum mujhe har din choose karte ho",
+      "Jab main tumhe bina kuch bole sirf gale lagata hoon",
+      "Jab main tumhari choti choti baatein yaad rakhta hoon",
+      "Jab main tumhe aise dekhta hoon jaise tum meri poori duniya ho",
+      "Jab main tumhe har din choose karta hoon",
     ],
-    correctAnswer: 2,
-    funnyResponse: {
-      correct: "Kyunki tum HO meri poori duniya, aur main chahta hoon tum ye hamesha meri aankhon mein dekho!",
-      wrong: "Sweet guess! Par jab humari nazrein milti hain, mujhe umeed hai tum infinity dekhti ho...",
-    },
+    emojis: ["🤗💕", "🥹💝", "👀💖", "💑💗"],
   },
   {
     id: 3,
@@ -56,11 +44,7 @@ const questions: Question[] = [
       "Teri smile mera nakli gussa tod dene wali hai",
       "Bas teri baahon mein wapas jaana hai",
     ],
-    correctAnswer: 1,
-    funnyResponse: {
-      correct: "Haha! Mujhe pata tha! Hamara pyaar itna strong hai ki koi bhi silly argument zyada der nahi tikta!",
-      wrong: "Sachchi baat toh ye hai... hum dono bas jaldi se manana chahte hain!",
-    },
+    emojis: ["😤💕", "⏰💗", "😊💖", "🤗💓"],
   },
   {
     id: 4,
@@ -69,58 +53,43 @@ const questions: Question[] = [
       "Hamari shaadi sochke butterflies aati hain",
       "Poora sukoon feel hota hai ki tum meri kismat ho",
       "Tumhe husband bolne ka wait nahi hota",
-      "Grateful aansu aate hain is beautiful love story ke liye",
+      "Grateful feel hoti hoon is beautiful love story ke liye",
     ],
-    correctAnswer: 2,
-    funnyResponse: {
-      correct: "Jaldi hi, meri jaan... jaldi hi tum mujhe hamesha ke liye apna bulaaogi, aur mujhe wait nahi hota!",
-      wrong: "Har jawab ek hi beautiful sach ki taraf jaata hai - hamara forever stars mein likha hai!",
-    },
+    emojis: ["🦋💒", "☺️💫", "💍💕", "🙏💖"],
   },
   {
     id: 5,
-    question: "Tumhe kya lagta hai jab main tumhe succeed hote dekhta hoon toh meri rooh kaisa feel karti hai?",
+    question: "Tumhe kya lagta hai jab main tumhe succeed hote dekhta hoon toh mujhe kaisa feel hota hai?",
     options: [
       "Khud ki success se bhi zyada proud feel hota hai",
       "Poori duniya ko tumhare baare mein batana chahta hoon",
       "Phir se tumse pyaar ho jaata hai",
       "Itna overwhelmed ki main tumhe apna keh sakta hoon",
     ],
-    correctAnswer: 0,
-    funnyResponse: {
-      correct: "Tum mere dil ko kitna achhe se jaanti ho! Tumhari khushi meri sabse badi achievement hai!",
-      wrong: "Sab sahi hai, meri jaan! Par tumhara biggest supporter hona hamesha pehle aayega!",
-    },
+    emojis: ["🏆💕", "📢💗", "😍💖", "🥺💓"],
   },
 ]
 
 export function LoveQuiz() {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [showResult, setShowResult] = useState(false)
-  const [score, setScore] = useState(0)
+  const [showEmoji, setShowEmoji] = useState(false)
+  const [selectedEmoji, setSelectedEmoji] = useState("")
   const [quizComplete, setQuizComplete] = useState(false)
-  const [feedback, setFeedback] = useState<string>("")
 
   const handleAnswer = (optionIndex: number) => {
-    if (showResult) return
+    if (showEmoji) return
     setSelectedAnswer(optionIndex)
-    const isCorrect = optionIndex === questions[currentQuestion].correctAnswer
-    if (isCorrect) {
-      setScore(score + 1)
-      setFeedback(questions[currentQuestion].funnyResponse.correct)
-    } else {
-      setFeedback(questions[currentQuestion].funnyResponse.wrong)
-    }
-    setShowResult(true)
+    setSelectedEmoji(questions[currentQuestion].emojis[optionIndex])
+    setShowEmoji(true)
   }
 
   const nextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1)
       setSelectedAnswer(null)
-      setShowResult(false)
-      setFeedback("")
+      setShowEmoji(false)
+      setSelectedEmoji("")
     } else {
       setQuizComplete(true)
     }
@@ -129,31 +98,20 @@ export function LoveQuiz() {
   const restartQuiz = () => {
     setCurrentQuestion(0)
     setSelectedAnswer(null)
-    setShowResult(false)
-    setScore(0)
+    setShowEmoji(false)
+    setSelectedEmoji("")
     setQuizComplete(false)
-    setFeedback("")
   }
 
   if (quizComplete) {
-    const percentage = (score / questions.length) * 100
-    let message = ""
-    if (percentage === 100) {
-      message = "Tum mera dil poori tarah se jaanti ho... tabhi toh tumse itna gehra pyaar ho gaya!"
-    } else if (percentage >= 60) {
-      message = "Tum sachchi mein hamare pyaar ko samajhti ho! Isliye hum perfect hain saath mein, meri jaan!"
-    } else {
-      message = "Hamara pyaar shabdon se kahin zyada bolta hai... aur ye kitna khoobsurat hai!"
-    }
-
     return (
       <div className="text-center space-y-6 py-8">
         <Sparkles className="w-16 h-16 text-primary mx-auto animate-pulse" />
         <h3 className="text-3xl font-serif text-foreground">Hamare Dilon Ne Bol Diya!</h3>
-        <p className="text-5xl font-serif text-primary">
-          {score}/{questions.length}
+        <p className="text-5xl">💕💑💕</p>
+        <p className="text-lg text-muted-foreground max-w-md mx-auto">
+          Har jawab mein hamara pyaar dikhai deta hai... Tum meri jaan ho, hamesha ke liye!
         </p>
-        <p className="text-lg text-muted-foreground max-w-md mx-auto">{message}</p>
         <Button
           onClick={restartQuiz}
           className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -198,45 +156,42 @@ export function LoveQuiz() {
       <div className="space-y-3 max-w-lg mx-auto">
         {questions[currentQuestion].options.map((option, index) => {
           const isSelected = selectedAnswer === index
-          const isCorrect = index === questions[currentQuestion].correctAnswer
-          const showCorrect = showResult && isCorrect
-          const showWrong = showResult && isSelected && !isCorrect
 
           return (
             <button
               key={index}
               onClick={() => handleAnswer(index)}
-              disabled={showResult}
+              disabled={showEmoji}
               className={cn(
                 "w-full p-4 rounded-xl text-left transition-all duration-300 border-2",
-                !showResult && "hover:border-primary hover:bg-accent/50 cursor-pointer",
-                !showResult && "bg-card border-border",
-                showCorrect && "bg-green-50 border-green-400",
-                showWrong && "bg-red-50 border-red-400",
-                showResult && !showCorrect && !showWrong && "bg-muted/50 border-border opacity-60"
+                !showEmoji && "hover:border-primary hover:bg-accent/50 cursor-pointer",
+                !showEmoji && "bg-card border-border",
+                isSelected && "bg-primary/10 border-primary",
+                showEmoji && !isSelected && "bg-muted/50 border-border opacity-60"
               )}
             >
               <div className="flex items-center justify-between">
-                <span className={cn("text-foreground", showCorrect && "text-green-700", showWrong && "text-red-700")}>
+                <span className={cn("text-foreground", isSelected && "text-primary font-medium")}>
                   {option}
                 </span>
-                {showCorrect && <Check className="w-5 h-5 text-green-500" />}
-                {showWrong && <X className="w-5 h-5 text-red-500" />}
+                {isSelected && showEmoji && (
+                  <span className="text-2xl animate-bounce">{selectedEmoji}</span>
+                )}
               </div>
             </button>
           )
         })}
       </div>
 
-      {/* Feedback */}
-      {showResult && (
+      {/* Emoji Reaction */}
+      {showEmoji && (
         <div className="text-center space-y-4 animate-in fade-in duration-300">
-          <p className="text-lg text-muted-foreground italic">{feedback}</p>
+          <p className="text-4xl animate-pulse">{selectedEmoji}</p>
           <Button
             onClick={nextQuestion}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            {currentQuestion < questions.length - 1 ? "Agla Sawaal" : "Hamara Love Score Dekho"}
+            {currentQuestion < questions.length - 1 ? "Agla Sawaal" : "Quiz Complete Karo"}
             <Heart className="w-4 h-4 ml-2" />
           </Button>
         </div>

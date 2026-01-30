@@ -3,9 +3,9 @@
 import { useState } from "react"
 import { Heart, Sparkles } from "lucide-react"
 import { CountdownTimer } from "@/components/countdown-timer"
-import { ReasonsILoveYou } from "@/components/reasons-i-love-you"
 import { LoveQuiz } from "@/components/love-quiz"
 import { RingBoxIntro } from "@/components/ring-box-intro"
+import { ValentineJourney } from "@/components/valentine-journey"
 
 export default function AnniversaryPage() {
   const [showIntro, setShowIntro] = useState(true)
@@ -102,7 +102,7 @@ export default function AnniversaryPage() {
           </div>
         </section>
 
-        {/* Reasons I Love You Section */}
+        {/* Valentine Journey Section */}
         <section className="py-16 px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-12">
@@ -112,13 +112,13 @@ export default function AnniversaryPage() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Our Love Story Memory Game
+                Our Valentine Week Journey
               </h2>
               <p className="text-muted-foreground">
-                Match the love phrases and complete our romantic story together
+                Tap through our special moments together
               </p>
             </div>
-            <ReasonsILoveYou />
+            <ValentineJourney />
           </div>
         </section>
 
@@ -161,20 +161,17 @@ export default function AnniversaryPage() {
               {'"From five beautiful years... to seven sacred vows around the holy fire"'}
             </p>
             <p className="text-lg md:text-xl opacity-80 max-w-xl mx-auto leading-relaxed">
-              Today we celebrate 1,825 days of loving you. Soon, we will take our Saat Phere 
-              around the Agni, and with each sacred step, I will promise you my love for 
-              this life and the next seven lifetimes. You are my Ardhangini &mdash; the other 
-              half of my soul. Until we are bound by the sacred thread of marriage, 
-              and for all eternity after &mdash; Tum Meri Ho, Hamesha Ke Liye.
+              Soon, we will take our Saat Phere around the Agni, and with each sacred step, 
+              I will promise you my love for this life and the next seven lifetimes. 
+              You are my Ardhangini &mdash; the other half of my soul. Until we are bound 
+              by the sacred thread of marriage, and for all eternity after &mdash; 
+              Tum Meri Ho, Hamesha Ke Liye.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3">
               <span className="text-xl font-serif text-primary">Dhruvi</span>
               <span className="text-2xl text-primary">&</span>
               <span className="text-xl font-serif text-primary">Niral</span>
             </div>
-            <p className="mt-4 text-base opacity-70 italic font-serif">
-              &ldquo;Saat Janmon Ka Rishta&rdquo;
-            </p>
             <p className="mt-6 text-sm opacity-60">
               Made with love and devotion for our sacred journey together
             </p>
