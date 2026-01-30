@@ -1,158 +1,475 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Heart } from "lucide-react"
+import { useState } from "react"
+import { Heart, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface RingBoxIntroProps {
   onComplete: () => void
 }
 
 export function RingBoxIntro({ onComplete }: RingBoxIntroProps) {
-  const [stage, setStage] = useState<"closed" | "opening" | "ring" | "fading">("closed")
+  const [stage, setStage] = useState<
+    "question" | "areyousure" | "youaremine" | "glow" | "opening" | "ring" | "text" | "fading"
+  >("question")
+  const [noCount, setNoCount] = useState(0)
 
-  useEffect(() => {
-    // Start opening after a brief pause
-    const timer1 = setTimeout(() => setStage("opening"), 800)
-    // Show ring
-    const timer2 = setTimeout(() => setStage("ring"), 2000)
-    // Start fading
-    const timer3 = setTimeout(() => setStage("fading"), 3500)
-    // Complete
-    const timer4 = setTimeout(() => onComplete(), 4500)
+  const handleYes = () => {
+    setStage("glow")
+    setTimeout(() => setStage("opening"), 1000)
+    setTimeout(() => setStage("ring"), 2300)
+    setTimeout(() => setStage("text"), 3300)
+    setTimeout(() => setStage("fading"), 5000)
+    setTimeout(() => onComplete(), 6000)
+  }
 
-    return () => {
-      clearTimeout(timer1)
-      clearTimeout(timer2)
-      clearTimeout(timer3)
-      clearTimeout(timer4)
+  const handleNo = () => {
+    if (noCount === 0) {
+      setNoCount(1)
+      setStage("areyousure")
+    } else {
+      setNoCount(2)
+      setStage("youaremine")
+      setTimeout(() => {
+        setStage("glow")
+        setTimeout(() => setStage("opening"), 1000)
+        setTimeout(() => setStage("ring"), 2300)
+        setTimeout(() => setStage("text"), 3300)
+        setTimeout(() => setStage("fading"), 5000)
+        setTimeout(() => onComplete(), 6000)
+      }, 2500)
     }
-  }, [onComplete])
+  }
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-b from-rose-50 to-rose-100 transition-opacity duration-1000 ${
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-1000 ${
         stage === "fading" ? "opacity-0" : "opacity-100"
       }`}
+      style={{
+        background: "radial-gradient(ellipse at center, #1a0a10 0%, #0d0507 50%, #000000 100%)",
+      }}
     >
-      {/* Sparkle particles */}
+      {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(50)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-rose-300 rounded-full animate-pulse"
+            className="absolute rounded-full"
             style={{
+              width: `${1 + Math.random() * 3}px`,
+              height: `${1 + Math.random() * 3}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${1 + Math.random() * 2}s`,
+              background: `rgba(255, ${150 + Math.random() * 100}, ${180 + Math.random() * 75}, ${0.2 + Math.random() * 0.4})`,
+              animation: `twinkle ${2 + Math.random() * 3}s ease-in-out ${Math.random() * 2}s infinite`,
             }}
           />
         ))}
       </div>
 
-      {/* Ring Box Container */}
-      <div className="relative">
-        {/* Box Shadow */}
-        <div
-          className={`absolute -bottom-4 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/10 rounded-full blur-md transition-all duration-1000 ${
-            stage === "opening" || stage === "ring" ? "scale-110" : "scale-100"
-          }`}
-        />
-
-        {/* Box Base */}
-        <div className="relative w-52 h-32 bg-gradient-to-b from-rose-800 to-rose-900 rounded-lg shadow-2xl">
-          {/* Velvet Interior */}
-          <div className="absolute inset-2 bg-gradient-to-b from-rose-950 to-rose-900 rounded-md overflow-hidden">
-            {/* Ring Cushion */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-16 bg-rose-100/20 rounded-full blur-sm" />
-            
-            {/* Ring Slot */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-12 h-20">
-              {/* Ring */}
-              <div
-                className={`absolute bottom-0 left-1/2 -translate-x-1/2 transition-all duration-1000 ${
-                  stage === "ring" ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-50 translate-y-4"
-                }`}
-              >
-                {/* Ring Band */}
-                <div className="relative w-10 h-10 rounded-full border-4 border-yellow-400 shadow-lg">
-                  {/* Diamond */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-5 bg-gradient-to-br from-white via-rose-100 to-rose-200 rotate-45 shadow-lg">
-                    <div className="absolute inset-0.5 bg-gradient-to-br from-white to-rose-50 rotate-0" />
-                  </div>
-                  {/* Ring shine */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-yellow-200/50 to-transparent animate-pulse" />
-                </div>
-                {/* Glow effect */}
-                <div className="absolute -inset-4 bg-rose-400/20 rounded-full blur-xl animate-pulse" />
-              </div>
-            </div>
+      {/* Question Stage */}
+      {stage === "question" && (
+        <div className="relative z-10 text-center animate-fadeIn">
+          <div className="mb-8">
+            <Heart className="w-16 h-16 text-rose-500 mx-auto animate-pulse" fill="currentColor" />
           </div>
-
-          {/* Gold trim */}
-          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 rounded-t-lg" />
-          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-yellow-700 via-yellow-500 to-yellow-700 rounded-b-lg" />
-        </div>
-
-        {/* Box Lid */}
-        <div
-          className={`absolute -top-1 left-0 w-52 h-20 origin-bottom transition-all duration-1000 ease-out ${
-            stage === "opening" || stage === "ring"
-              ? "-rotate-x-110 -translate-y-16"
-              : "rotate-x-0 translate-y-0"
-          }`}
-          style={{
-            transformStyle: "preserve-3d",
-            perspective: "1000px",
-          }}
-        >
-          {/* Lid Top */}
-          <div className="absolute inset-0 bg-gradient-to-b from-rose-700 to-rose-800 rounded-t-lg shadow-xl">
-            {/* Gold trim on lid */}
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-yellow-600 via-yellow-400 to-yellow-600 rounded-t-lg" />
-            {/* Heart emblem */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <Heart className="w-8 h-8 text-yellow-500/80" fill="currentColor" />
-            </div>
+          <h1
+            className="font-serif text-4xl md:text-5xl mb-10 tracking-wide"
+            style={{
+              background: "linear-gradient(180deg, #ffd700 0%, #ffb347 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Will You Be Mine?
+          </h1>
+          <div className="flex gap-6 justify-center">
+            <Button
+              onClick={handleYes}
+              className="px-10 py-6 text-xl font-serif bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-full shadow-lg shadow-rose-500/30 transition-all hover:scale-105"
+            >
+              Yes
+            </Button>
+            <Button
+              onClick={handleNo}
+              variant="outline"
+              className="px-10 py-6 text-xl font-serif border-rose-400/50 text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 rounded-full transition-all hover:scale-105 bg-transparent"
+            >
+              No
+            </Button>
           </div>
-          {/* Lid Inner */}
-          <div
-            className="absolute inset-0 bg-rose-950 rounded-lg"
-            style={{ transform: "rotateX(180deg) translateZ(20px)" }}
-          />
-        </div>
-
-        {/* Text reveal */}
-        <div
-          className={`absolute -bottom-24 left-1/2 -translate-x-1/2 text-center whitespace-nowrap transition-all duration-700 ${
-            stage === "ring" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-        >
-          <p className="text-rose-800 font-serif text-2xl mb-1">Will you be mine forever?</p>
-          <p className="text-rose-600 text-sm tracking-widest uppercase">Dhruvi & Niral</p>
-        </div>
-      </div>
-
-      {/* Floating hearts */}
-      {stage === "ring" && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(12)].map((_, i) => (
-            <Heart
-              key={i}
-              className="absolute text-rose-300/60 animate-bounce"
-              fill="currentColor"
-              style={{
-                left: `${10 + Math.random() * 80}%`,
-                top: `${60 + Math.random() * 30}%`,
-                width: `${12 + Math.random() * 16}px`,
-                height: `${12 + Math.random() * 16}px`,
-                animationDelay: `${Math.random() * 0.5}s`,
-                animationDuration: `${1 + Math.random()}s`,
-              }}
-            />
-          ))}
         </div>
       )}
+
+      {/* Are You Sure Stage */}
+      {stage === "areyousure" && (
+        <div className="relative z-10 text-center animate-fadeIn">
+          <div className="mb-8 text-6xl">
+            🥺
+          </div>
+          <h1
+            className="font-serif text-4xl md:text-5xl mb-4 tracking-wide text-rose-300"
+          >
+            Are you sure?
+          </h1>
+          <p className="text-rose-400/70 mb-10 text-lg">Please think again...</p>
+          <div className="flex gap-6 justify-center">
+            <Button
+              onClick={handleYes}
+              className="px-10 py-6 text-xl font-serif bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white rounded-full shadow-lg shadow-rose-500/30 transition-all hover:scale-110"
+            >
+              Yes, I am yours!
+            </Button>
+            <Button
+              onClick={handleNo}
+              variant="outline"
+              className="px-8 py-6 text-lg font-serif border-rose-400/30 text-rose-400/60 hover:bg-rose-500/10 rounded-full transition-all bg-transparent"
+            >
+              No
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* You Are Mine Stage */}
+      {stage === "youaremine" && (
+        <div className="relative z-10 text-center animate-fadeIn">
+          <div className="mb-6">
+            <Heart className="w-20 h-20 text-rose-500 mx-auto animate-bounce" fill="currentColor" />
+          </div>
+          <h1
+            className="font-serif text-4xl md:text-5xl mb-4 tracking-wide"
+            style={{
+              background: "linear-gradient(180deg, #ff6b9d 0%, #ff4081 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            No! You are mine only!
+          </h1>
+          <p className="text-rose-300 text-xl mb-2">Forever and always</p>
+          <div className="flex justify-center gap-2 mt-6">
+            {[...Array(5)].map((_, i) => (
+              <Heart
+                key={i}
+                className="w-6 h-6 text-rose-500 animate-pulse"
+                fill="currentColor"
+                style={{ animationDelay: `${i * 100}ms` }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Ring Box Animation Stages */}
+      {(stage === "glow" || stage === "opening" || stage === "ring" || stage === "text" || stage === "fading") && (
+        <>
+          {/* Radial glow behind box */}
+          <div
+            className={`absolute w-96 h-96 rounded-full transition-all duration-1500 ease-out ${
+              stage !== "glow" ? "opacity-100 scale-100" : "opacity-50 scale-75"
+            }`}
+            style={{
+              background: "radial-gradient(circle, rgba(190,50,90,0.3) 0%, rgba(190,50,90,0) 70%)",
+              filter: "blur(40px)",
+            }}
+          />
+
+          {/* Main container with 3D perspective */}
+          <div
+            className="relative animate-fadeIn"
+            style={{ perspective: "1200px", transformStyle: "preserve-3d" }}
+          >
+            {/* Box shadow on ground */}
+            <div
+              className={`absolute -bottom-8 left-1/2 -translate-x-1/2 w-56 h-8 rounded-full transition-all duration-1000 ${
+                stage === "opening" || stage === "ring" || stage === "text"
+                  ? "opacity-60 scale-110"
+                  : "opacity-30 scale-100"
+              }`}
+              style={{
+                background: "radial-gradient(ellipse, rgba(0,0,0,0.8) 0%, transparent 70%)",
+                filter: "blur(8px)",
+              }}
+            />
+
+            {/* Ring Box - 3D */}
+            <div
+              className="relative transition-all duration-700"
+              style={{
+                transformStyle: "preserve-3d",
+                transform:
+                  stage === "opening" || stage === "ring" || stage === "text"
+                    ? "rotateX(15deg)"
+                    : "rotateX(0deg)",
+              }}
+            >
+              {/* Box Base */}
+              <div className="relative w-56 h-36 rounded-xl overflow-hidden">
+                {/* Velvet exterior gradient */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: "linear-gradient(145deg, #2a1520 0%, #1a0d12 50%, #0f0508 100%)",
+                  }}
+                />
+
+                {/* Subtle texture overlay */}
+                <div
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                  }}
+                />
+
+                {/* Interior velvet */}
+                <div
+                  className="absolute inset-3 rounded-lg"
+                  style={{
+                    background: "linear-gradient(180deg, #1a0a10 0%, #2d1018 50%, #1a0a10 100%)",
+                    boxShadow: "inset 0 4px 20px rgba(0,0,0,0.8)",
+                  }}
+                >
+                  {/* Ring cushion indent */}
+                  <div
+                    className="absolute bottom-3 left-1/2 -translate-x-1/2 w-24 h-20 rounded-full"
+                    style={{
+                      background: "radial-gradient(ellipse, rgba(60,20,35,1) 0%, rgba(30,10,18,1) 100%)",
+                      boxShadow: "inset 0 4px 15px rgba(0,0,0,0.6)",
+                    }}
+                  />
+
+                  {/* Ring */}
+                  <div
+                    className={`absolute bottom-6 left-1/2 -translate-x-1/2 transition-all duration-1000 ${
+                      stage === "ring" || stage === "text"
+                        ? "opacity-100 translate-y-0 scale-100"
+                        : "opacity-0 translate-y-8 scale-75"
+                    }`}
+                  >
+                    {/* Ring glow */}
+                    <div
+                      className="absolute -inset-6 rounded-full animate-pulse"
+                      style={{
+                        background: "radial-gradient(circle, rgba(255,215,0,0.4) 0%, transparent 70%)",
+                        filter: "blur(10px)",
+                      }}
+                    />
+
+                    {/* Ring band */}
+                    <div
+                      className="relative w-14 h-14 rounded-full"
+                      style={{
+                        background: "linear-gradient(135deg, #ffd700 0%, #b8860b 25%, #ffd700 50%, #daa520 75%, #ffd700 100%)",
+                        boxShadow: "0 4px 20px rgba(255,215,0,0.5), inset 0 2px 10px rgba(255,255,255,0.3)",
+                      }}
+                    >
+                      {/* Ring inner hole */}
+                      <div
+                        className="absolute inset-2 rounded-full"
+                        style={{
+                          background: "linear-gradient(180deg, #1a0a10 0%, #2d1018 100%)",
+                        }}
+                      />
+
+                      {/* Diamond */}
+                      <div
+                        className="absolute -top-5 left-1/2 -translate-x-1/2"
+                        style={{ filter: "drop-shadow(0 0 20px rgba(255,255,255,0.8))" }}
+                      >
+                        {/* Diamond shape */}
+                        <div
+                          className="relative w-8 h-8"
+                          style={{
+                            background: "linear-gradient(135deg, #ffffff 0%, #e8e8e8 25%, #ffffff 50%, #f0f0f0 75%, #ffffff 100%)",
+                            clipPath: "polygon(50% 0%, 100% 38%, 80% 100%, 20% 100%, 0% 38%)",
+                          }}
+                        >
+                          {/* Diamond shine */}
+                          <div
+                            className="absolute inset-0 animate-shine"
+                            style={{
+                              background: "linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.8) 50%, transparent 70%)",
+                              clipPath: "polygon(50% 0%, 100% 38%, 80% 100%, 20% 100%, 0% 38%)",
+                            }}
+                          />
+                        </div>
+                        {/* Diamond sparkles */}
+                        <Sparkles className="absolute -top-2 -right-2 w-4 h-4 text-white animate-pulse" />
+                        <Sparkles className="absolute -top-1 -left-3 w-3 h-3 text-white/80 animate-pulse delay-300" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Gold trim lines */}
+                <div
+                  className="absolute top-0 inset-x-0 h-1"
+                  style={{
+                    background: "linear-gradient(90deg, transparent 0%, #b8860b 20%, #ffd700 50%, #b8860b 80%, transparent 100%)",
+                  }}
+                />
+                <div
+                  className="absolute bottom-0 inset-x-0 h-0.5"
+                  style={{
+                    background: "linear-gradient(90deg, transparent 0%, #8b7355 20%, #b8860b 50%, #8b7355 80%, transparent 100%)",
+                  }}
+                />
+              </div>
+
+              {/* Box Lid with 3D flip */}
+              <div
+                className={`absolute top-0 left-0 w-56 h-24 origin-bottom transition-all ease-out ${
+                  stage === "opening" || stage === "ring" || stage === "text"
+                    ? "duration-1200"
+                    : "duration-500"
+                }`}
+                style={{
+                  transformStyle: "preserve-3d",
+                  transform:
+                    stage === "opening" || stage === "ring" || stage === "text"
+                      ? "rotateX(-130deg) translateY(-2px)"
+                      : "rotateX(0deg) translateY(0px)",
+                }}
+              >
+                {/* Lid outer surface */}
+                <div
+                  className="absolute inset-0 rounded-t-xl"
+                  style={{
+                    background: "linear-gradient(145deg, #2a1520 0%, #1a0d12 50%, #0f0508 100%)",
+                    backfaceVisibility: "hidden",
+                  }}
+                >
+                  {/* Gold trim on lid */}
+                  <div
+                    className="absolute top-0 inset-x-0 h-1 rounded-t-xl"
+                    style={{
+                      background: "linear-gradient(90deg, transparent 0%, #b8860b 20%, #ffd700 50%, #b8860b 80%, transparent 100%)",
+                    }}
+                  />
+
+                  {/* Heart emblem */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div className="transition-all duration-500 scale-110">
+                      <Heart
+                        className="w-12 h-12 text-rose-400 drop-shadow-[0_0_15px_rgba(244,63,94,0.8)]"
+                        fill="currentColor"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Texture overlay */}
+                  <div
+                    className="absolute inset-0 opacity-20 rounded-t-xl"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                    }}
+                  />
+                </div>
+
+                {/* Lid inner surface */}
+                <div
+                  className="absolute inset-0 rounded-xl"
+                  style={{
+                    background: "linear-gradient(180deg, #2d1018 0%, #1a0a10 100%)",
+                    transform: "rotateX(180deg)",
+                    backfaceVisibility: "hidden",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Text reveal */}
+            <div
+              className={`absolute -bottom-32 left-1/2 -translate-x-1/2 text-center w-80 transition-all duration-700 ${
+                stage === "text" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+              }`}
+            >
+              <p
+                className="font-serif text-3xl mb-3 tracking-wide"
+                style={{
+                  background: "linear-gradient(180deg, #ffd700 0%, #ffb347 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  textShadow: "0 0 40px rgba(255,215,0,0.3)",
+                }}
+              >
+                Forever Yours
+              </p>
+              <p className="text-rose-300/80 text-sm tracking-[0.3em] uppercase">
+                Dhruvi & Niral
+              </p>
+            </div>
+          </div>
+
+          {/* Rising hearts animation */}
+          {(stage === "ring" || stage === "text") && (
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {[...Array(15)].map((_, i) => (
+                <Heart
+                  key={i}
+                  className="absolute text-rose-500/40"
+                  fill="currentColor"
+                  style={{
+                    left: `${5 + Math.random() * 90}%`,
+                    bottom: "-20px",
+                    width: `${16 + Math.random() * 20}px`,
+                    height: `${16 + Math.random() * 20}px`,
+                    animation: `rise ${4 + Math.random() * 3}s ease-out ${Math.random() * 2}s infinite`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      <style jsx>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.5); }
+        }
+        @keyframes shine {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes rise {
+          0% {
+            transform: translateY(0) rotate(0deg) scale(1);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.6;
+          }
+          90% {
+            opacity: 0.4;
+          }
+          100% {
+            transform: translateY(-100vh) rotate(20deg) scale(0.5);
+            opacity: 0;
+          }
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-shine {
+          animation: shine 2s ease-in-out infinite;
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.6s ease-out forwards;
+        }
+        .delay-300 {
+          animation-delay: 300ms;
+        }
+        .duration-1200 {
+          transition-duration: 1200ms;
+        }
+        .duration-1500 {
+          transition-duration: 1500ms;
+        }
+      `}</style>
     </div>
   )
 }
