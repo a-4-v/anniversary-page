@@ -2,61 +2,62 @@
 
 import { useState } from "react"
 import { Heart } from "lucide-react"
+import Image from "next/image"
 
 const journeySteps = [
   {
     id: "rose",
     title: "Rose Day",
-    icon: "rose",
+    image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop&q=80",
     message: "A rose for the most beautiful person in my life",
     instruction: "Tap to continue",
   },
   {
     id: "proposal",
     title: "Propose Day",
-    icon: "ring",
+    image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=400&h=400&fit=crop&q=80",
     message: "Will you be my life partner?",
     instruction: "Tap to continue",
   },
   {
     id: "chocolate",
     title: "Chocolate Day",
-    icon: "chocolate",
+    image: "https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=400&h=400&fit=crop&q=80",
     message: "You make life sweeter than any chocolate",
     instruction: "Tap to continue",
   },
   {
     id: "teddy",
     title: "Teddy Day",
-    icon: "teddy",
+    image: "https://images.unsplash.com/photo-1558679908-541bcf1249ff?w=400&h=400&fit=crop&q=80",
     message: "Someone to remind you of me when I am not around",
     instruction: "Tap to continue",
   },
   {
     id: "promise",
     title: "Promise Day",
-    icon: "promise",
+    image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=400&fit=crop&q=80",
     message: "I am only yours, you are the most special person to me",
     instruction: "Tap to continue",
   },
   {
     id: "hug",
     title: "Hug Day",
-    icon: "hug",
+    image: "https://images.unsplash.com/photo-1508407576665-2be1458d7a72?w=400&h=400&fit=crop&q=80",
     message: "My most comfortable place",
     instruction: "Tap to continue",
   },
   {
     id: "kiss",
     title: "Kiss Day",
-    icon: "kiss",
+    image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=400&h=400&fit=crop&q=80",
     message: "I will never leave you",
     instruction: "Tap to continue",
   },
   {
     id: "letter",
     title: "Valentine's Day",
-    icon: "letter",
+    image: "https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?w=400&h=400&fit=crop&q=80",
     message: "",
     instruction: "",
   },
@@ -327,18 +328,24 @@ export function ValentineJourney() {
           {step.title}
         </p>
 
-        {/* Icon */}
+        {/* Image */}
         <div className="flex justify-center mb-6">
-          <div className="relative">
-            {getIcon(step.icon, "w-28 h-28 md:w-36 md:h-36")}
+          <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-2xl overflow-hidden shadow-lg">
+            <Image
+              src={step.image || "/placeholder.svg"}
+              alt={step.title}
+              fill
+              className="object-cover"
+              unoptimized
+            />
           </div>
         </div>
 
         {/* Message or Letter */}
         {isLetter ? (
           <div className="space-y-6">
-            <div className="bg-secondary/50 rounded-2xl p-6 md:p-8 border border-border">
-              <p className="text-base md:text-lg leading-relaxed text-foreground font-serif whitespace-pre-line text-left">
+            <div className="bg-gradient-to-b from-amber-50 to-orange-50 rounded-2xl p-6 md:p-8 border border-amber-200 shadow-inner">
+              <p className="text-base md:text-lg leading-loose text-amber-900 font-serif text-justify">
                 {finalLetter}
               </p>
             </div>
