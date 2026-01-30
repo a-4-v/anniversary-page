@@ -1,315 +1,316 @@
 "use client"
 
-import React from "react"
+import { useState, useEffect, useCallback } from "react"
+import { Heart, RotateCcw, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
-import { useState, useEffect } from "react"
-import { Heart, Sparkles } from "lucide-react"
+interface Card {
+  id: number
+  pairId: number
+  content: string
+  type: "start" | "end"
+  isFlipped: boolean
+  isMatched: boolean
+}
 
-const loveNotes = [
-  {
-    id: 1,
-    note: "The way your eyes light up when you see me",
-    detail: "Even after 1,825 days, your smile still makes my heart skip a beat",
-  },
-  {
-    id: 2,
-    note: "How you remember the smallest details about us",
-    detail: "Every little thing I mention, you treasure it in your heart",
-  },
-  {
-    id: 3,
-    note: "Your laugh that fills my soul with joy",
-    detail: "The sound of your happiness is my favorite melody",
-  },
-  {
-    id: 4,
-    note: "The way you hold my hand like you never want to let go",
-    detail: "In your grip, I feel safe, loved, and complete",
-  },
-  {
-    id: 5,
-    note: "How you believe in me when I doubt myself",
-    detail: "Your faith in me makes me want to be a better person",
-  },
-  {
-    id: 6,
-    note: "The comfort of your silence beside me",
-    detail: "We do not need words when our hearts speak so loudly",
-  },
-  {
-    id: 7,
-    note: "Your patience with all my imperfections",
-    detail: "You love me not despite my flaws, but with them",
-  },
+const lovePhrases = [
+  { start: "Tum Meri", end: "Jaan Ho" },
+  { start: "Dil Se", end: "Pyaar Hai" },
+  { start: "Hamesha", end: "Tumhare Saath" },
+  { start: "Saat Janam", end: "Ka Rishta" },
+  { start: "Meri", end: "Dhruvi" },
+  { start: "Forever", end: "Yours" },
 ]
 
-interface FloatingHeart {
-  id: number
-  x: number
-  y: number
-  scale: number
-  delay: number
-  duration: number
-  revealed: boolean
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
 }
 
 export function ReasonsILoveYou() {
-  const [hearts, setHearts] = useState<FloatingHeart[]>([])
-  const [revealedNote, setRevealedNote] = useState<number | null>(null)
-  const [revealedCount, setRevealedCount] = useState(0)
-  const [sparkles, setSparkles] = useState<{ id: number; x: number; y: number }[]>([])
+  const [cards, setCards] = useState<Card[]>([])
+  const [flippedCards, setFlippedCards] = useState<number[]>([])
+  const [matchedPairs, setMatchedPairs] = useState<number>(0)
+  const [moves, setMoves] = useState<number>(0)
+  const [isChecking, setIsChecking] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const [sparklePositions, setSparklePositions] = useState<{ x: number; y: number }[]>([])
 
-  useEffect(() => {
-    // Create floating hearts with positions
-    const initialHearts: FloatingHeart[] = loveNotes.map((_, index) => ({
-      id: index,
-      x: 10 + (index % 4) * 22 + Math.random() * 10,
-      y: 15 + Math.floor(index / 4) * 40 + Math.random() * 15,
-      scale: 0.8 + Math.random() * 0.4,
-      delay: index * 0.2,
-      duration: 3 + Math.random() * 2,
-      revealed: false,
-    }))
-    setHearts(initialHearts)
+  const initializeGame = useCallback(() => {
+    const cardPairs: Card[] = []
+    lovePhrases.forEach((phrase, index) => {
+      cardPairs.push({
+        id: index * 2,
+        pairId: index,
+        content: phrase.start,
+        type: "start",
+        isFlipped: false,
+        isMatched: false,
+      })
+      cardPairs.push({
+        id: index * 2 + 1,
+        pairId: index,
+        content: phrase.end,
+        type: "end",
+        isFlipped: false,
+        isMatched: false,
+      })
+    })
+    setCards(shuffleArray(cardPairs))
+    setFlippedCards([])
+    setMatchedPairs(0)
+    setMoves(0)
+    setShowCelebration(false)
   }, [])
 
-  const handleHeartClick = (heartId: number, event: React.MouseEvent) => {
-    const heart = hearts.find((h) => h.id === heartId)
-    if (heart?.revealed) return
+  useEffect(() => {
+    initializeGame()
+  }, [initializeGame])
 
-    // Create sparkle effect at click position
-    const rect = event.currentTarget.getBoundingClientRect()
-    const containerRect = event.currentTarget.parentElement?.getBoundingClientRect()
-    if (containerRect) {
-      const newSparkles = Array.from({ length: 8 }, (_, i) => ({
-        id: Date.now() + i,
-        x: rect.left - containerRect.left + rect.width / 2,
-        y: rect.top - containerRect.top + rect.height / 2,
-      }))
-      setSparkles((prev) => [...prev, ...newSparkles])
-      setTimeout(() => {
-        setSparkles((prev) => prev.filter((s) => !newSparkles.find((ns) => ns.id === s.id)))
-      }, 1000)
-    }
+  const handleCardClick = (cardId: number) => {
+    if (isChecking) return
+    const card = cards.find((c) => c.id === cardId)
+    if (!card || card.isFlipped || card.isMatched) return
+    if (flippedCards.length >= 2) return
 
-    // Mark heart as revealed
-    setHearts((prev) =>
-      prev.map((h) => (h.id === heartId ? { ...h, revealed: true } : h))
+    const newCards = cards.map((c) =>
+      c.id === cardId ? { ...c, isFlipped: true } : c
     )
-    setRevealedNote(heartId)
-    setRevealedCount((prev) => prev + 1)
+    setCards(newCards)
+
+    const newFlipped = [...flippedCards, cardId]
+    setFlippedCards(newFlipped)
+
+    if (newFlipped.length === 2) {
+      setMoves((m) => m + 1)
+      setIsChecking(true)
+
+      const [firstId, secondId] = newFlipped
+      const firstCard = newCards.find((c) => c.id === firstId)
+      const secondCard = newCards.find((c) => c.id === secondId)
+
+      if (firstCard && secondCard && firstCard.pairId === secondCard.pairId && firstCard.type !== secondCard.type) {
+        // Match found
+        setTimeout(() => {
+          setCards((prev) =>
+            prev.map((c) =>
+              c.pairId === firstCard.pairId ? { ...c, isMatched: true } : c
+            )
+          )
+          setMatchedPairs((m) => {
+            const newCount = m + 1
+            if (newCount === lovePhrases.length) {
+              setShowCelebration(true)
+              // Generate sparkle positions
+              const sparkles = Array.from({ length: 20 }, () => ({
+                x: Math.random() * 100,
+                y: Math.random() * 100,
+              }))
+              setSparklePositions(sparkles)
+            }
+            return newCount
+          })
+          setFlippedCards([])
+          setIsChecking(false)
+        }, 600)
+      } else {
+        // No match
+        setTimeout(() => {
+          setCards((prev) =>
+            prev.map((c) =>
+              newFlipped.includes(c.id) ? { ...c, isFlipped: false } : c
+            )
+          )
+          setFlippedCards([])
+          setIsChecking(false)
+        }, 1000)
+      }
+    }
   }
 
-  const closeNote = () => {
-    setRevealedNote(null)
-  }
-
-  const allRevealed = revealedCount === loveNotes.length
+  const isGameComplete = matchedPairs === lovePhrases.length
 
   return (
     <div className="relative">
-      {/* Interactive Hearts Container */}
-      <div className="relative bg-card rounded-3xl p-6 md:p-10 shadow-xl border border-border overflow-hidden min-h-[400px]">
+      <div className="bg-card rounded-3xl p-6 md:p-8 shadow-xl border border-border overflow-hidden">
         {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
 
-        {/* Instruction text */}
-        <div className="relative z-10 text-center mb-8">
-          <p className="text-muted-foreground text-sm md:text-base">
-            {allRevealed
-              ? "You have discovered all my reasons..."
-              : "Tap on the floating hearts to reveal my love notes"}
+        {/* Header */}
+        <div className="relative text-center mb-6">
+          <h3 className="font-serif text-xl md:text-2xl text-foreground mb-2">
+            Match Our Love Phrases
+          </h3>
+          <p className="text-muted-foreground text-sm">
+            Find the matching pairs to complete our love story
           </p>
-          <p className="text-primary/70 text-xs mt-1">
-            {revealedCount} of {loveNotes.length} discovered
-          </p>
+          <div className="flex justify-center gap-6 mt-4 text-sm">
+            <span className="text-muted-foreground">
+              Moves: <span className="text-primary font-semibold">{moves}</span>
+            </span>
+            <span className="text-muted-foreground">
+              Matched: <span className="text-primary font-semibold">{matchedPairs}/{lovePhrases.length}</span>
+            </span>
+          </div>
         </div>
 
-        {/* Floating Hearts */}
-        <div className="relative h-[280px] md:h-[320px]">
-          {hearts.map((heart) => (
+        {/* Game Grid */}
+        <div className="relative grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
+          {cards.map((card) => (
             <button
-              key={heart.id}
-              onClick={(e) => handleHeartClick(heart.id, e)}
-              disabled={heart.revealed}
-              className={`absolute transition-all duration-500 focus:outline-none group ${
-                heart.revealed
-                  ? "opacity-30 cursor-default"
-                  : "cursor-pointer hover:scale-125"
-              }`}
-              style={{
-                left: `${heart.x}%`,
-                top: `${heart.y}%`,
-                transform: `scale(${heart.scale})`,
-                animation: heart.revealed
-                  ? "none"
-                  : `float ${heart.duration}s ease-in-out ${heart.delay}s infinite`,
-              }}
+              key={card.id}
+              onClick={() => handleCardClick(card.id)}
+              disabled={card.isFlipped || card.isMatched || isChecking}
+              className="relative aspect-[3/4] perspective-1000"
             >
-              <div className="relative">
-                <Heart
-                  className={`w-12 h-12 md:w-14 md:h-14 transition-colors duration-300 ${
-                    heart.revealed
-                      ? "text-primary/40"
-                      : "text-primary group-hover:text-primary/80"
-                  }`}
-                  fill="currentColor"
-                />
-                {!heart.revealed && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-sm">
-                      {heart.id + 1}
-                    </span>
-                  </div>
-                )}
-                {!heart.revealed && (
-                  <div className="absolute -inset-2 bg-primary/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-                )}
+              <div
+                className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${
+                  card.isFlipped || card.isMatched ? "rotate-y-180" : ""
+                }`}
+              >
+                {/* Card Back */}
+                <div
+                  className={`absolute inset-0 rounded-xl flex items-center justify-center backface-hidden ${
+                    card.isMatched
+                      ? "bg-primary/20"
+                      : "bg-gradient-to-br from-primary/80 to-primary cursor-pointer hover:from-primary hover:to-primary/90 hover:scale-105"
+                  } transition-all duration-300 shadow-lg border border-primary/20`}
+                >
+                  <Heart
+                    className={`w-8 h-8 md:w-10 md:h-10 ${
+                      card.isMatched ? "text-primary/40" : "text-primary-foreground"
+                    }`}
+                    fill="currentColor"
+                  />
+                </div>
+
+                {/* Card Front */}
+                <div
+                  className={`absolute inset-0 rounded-xl flex items-center justify-center p-2 backface-hidden rotate-y-180 ${
+                    card.isMatched
+                      ? "bg-gradient-to-br from-accent/40 to-primary/30 border-primary/40"
+                      : "bg-card border-primary/30"
+                  } border-2 shadow-lg`}
+                >
+                  <span
+                    className={`font-serif text-sm md:text-base text-center leading-tight ${
+                      card.isMatched ? "text-primary" : "text-foreground"
+                    }`}
+                  >
+                    {card.content}
+                  </span>
+                  {card.isMatched && (
+                    <Sparkles className="absolute top-2 right-2 w-4 h-4 text-primary animate-pulse" />
+                  )}
+                </div>
               </div>
             </button>
           ))}
 
-          {/* Sparkle effects */}
-          {sparkles.map((sparkle) => (
-            <div
-              key={sparkle.id}
-              className="absolute pointer-events-none"
-              style={{ left: sparkle.x, top: sparkle.y }}
-            >
-              {[...Array(8)].map((_, i) => (
-                <Sparkles
-                  key={i}
-                  className="absolute w-4 h-4 text-primary animate-sparkle"
-                  style={{
-                    transform: `rotate(${i * 45}deg) translateY(-20px)`,
-                    animationDelay: `${i * 0.05}s`,
-                  }}
-                />
-              ))}
-            </div>
-          ))}
+          {/* Celebration sparkles */}
+          {showCelebration &&
+            sparklePositions.map((pos, i) => (
+              <div
+                key={i}
+                className="absolute pointer-events-none animate-sparkle-float"
+                style={{
+                  left: `${pos.x}%`,
+                  top: `${pos.y}%`,
+                  animationDelay: `${i * 0.1}s`,
+                }}
+              >
+                <Sparkles className="w-4 h-4 text-primary" />
+              </div>
+            ))}
         </div>
 
-        {/* Progress bar */}
-        <div className="relative z-10 mt-4">
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-700 ease-out rounded-full"
-              style={{ width: `${(revealedCount / loveNotes.length) * 100}%` }}
-            />
+        {/* Game Complete Message */}
+        {isGameComplete && (
+          <div className="relative mt-8 text-center animate-fade-in">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <Heart className="w-6 h-6 text-primary animate-pulse" fill="currentColor" />
+              <span className="font-serif text-xl text-primary">Perfect Match!</span>
+              <Heart className="w-6 h-6 text-primary animate-pulse" fill="currentColor" />
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Just like us... we are meant to be together forever
+            </p>
+            <p className="text-sm text-foreground/70 mb-6">
+              Completed in {moves} moves
+            </p>
+            <Button
+              onClick={initializeGame}
+              variant="outline"
+              className="border-primary/50 text-primary hover:bg-primary/10 bg-transparent"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Play Again
+            </Button>
           </div>
-        </div>
+        )}
+
+        {/* Reset button when game is in progress */}
+        {!isGameComplete && moves > 0 && (
+          <div className="relative mt-6 text-center">
+            <Button
+              onClick={initializeGame}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-primary"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Start Over
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Revealed Note Modal */}
-      {revealedNote !== null && (
-        <div
-          className="fixed inset-0 bg-foreground/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={closeNote}
-        >
-          <div
-            className="bg-card rounded-3xl p-8 md:p-12 max-w-md w-full shadow-2xl border border-primary/20 animate-reveal-note"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Heart with number */}
-            <div className="flex justify-center mb-6">
-              <div className="relative animate-pulse-heart">
-                <Heart className="w-20 h-20 text-primary" fill="currentColor" />
-                <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-primary-foreground">
-                  {revealedNote + 1}
-                </span>
-              </div>
-            </div>
-
-            {/* Note content */}
-            <h3 className="text-xl md:text-2xl font-serif text-foreground text-center mb-4 leading-relaxed">
-              &ldquo;{loveNotes[revealedNote].note}&rdquo;
-            </h3>
-            <p className="text-muted-foreground italic text-center">
-              {loveNotes[revealedNote].detail}
-            </p>
-
-            {/* Close button */}
-            <button
-              onClick={closeNote}
-              className="mt-8 w-full py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors"
-            >
-              Keep This Close to Your Heart
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* All revealed celebration */}
-      {allRevealed && (
-        <div className="mt-6 text-center animate-fade-in">
-          <p className="text-lg font-serif text-primary">
-            And there are infinite more reasons waiting to be written...
-          </p>
-          <p className="text-sm text-muted-foreground mt-2 italic">
-            7 reasons, one for each sacred vow of our Saat Phere
-          </p>
-        </div>
-      )}
-
       <style jsx>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-15px);
-          }
+        .perspective-1000 {
+          perspective: 1000px;
         }
-        @keyframes sparkle {
-          0% {
-            opacity: 1;
-            transform: rotate(var(--rotation)) translateY(0) scale(1);
-          }
-          100% {
-            opacity: 0;
-            transform: rotate(var(--rotation)) translateY(-30px) scale(0);
-          }
+        .transform-style-3d {
+          transform-style: preserve-3d;
         }
-        @keyframes reveal-note {
-          0% {
-            opacity: 0;
-            transform: scale(0.8) translateY(20px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
+        .backface-hidden {
+          backface-visibility: hidden;
         }
-        @keyframes pulse-heart {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.1);
-          }
+        .rotate-y-180 {
+          transform: rotateY(180deg);
         }
         @keyframes fade-in {
-          0% {
+          from {
             opacity: 0;
             transform: translateY(10px);
           }
-          100% {
+          to {
             opacity: 1;
             transform: translateY(0);
           }
         }
-        .animate-reveal-note {
-          animation: reveal-note 0.4s ease-out forwards;
-        }
-        .animate-pulse-heart {
-          animation: pulse-heart 1.5s ease-in-out infinite;
+        @keyframes sparkle-float {
+          0% {
+            opacity: 0;
+            transform: scale(0) rotate(0deg);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1) rotate(180deg);
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0) rotate(360deg) translateY(-20px);
+          }
         }
         .animate-fade-in {
           animation: fade-in 0.6s ease-out forwards;
         }
-        .animate-sparkle {
-          animation: sparkle 0.6s ease-out forwards;
+        .animate-sparkle-float {
+          animation: sparkle-float 1.5s ease-out forwards;
         }
       `}</style>
     </div>

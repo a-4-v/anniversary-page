@@ -112,10 +112,10 @@ export default function AnniversaryPage() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Why I Fell In Love With You
+                Our Love Story Memory Game
               </h2>
               <p className="text-muted-foreground">
-                A collection of moments and reasons that made my heart forever yours
+                Match the love phrases and complete our romantic story together
               </p>
             </div>
             <ReasonsILoveYou />
