@@ -112,10 +112,10 @@ export default function AnniversaryPage() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Catch My Love
+                Scratch & Reveal My Love
               </h2>
               <p className="text-muted-foreground">
-                Catch the falling hearts and collect all my love for you
+                Scratch each card to reveal the love notes I wrote for you
               </p>
             </div>
             <ReasonsILoveYou />
