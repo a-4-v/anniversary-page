@@ -102,6 +102,26 @@ export default function AnniversaryPage() {
           </div>
         </section>
 
+        {/* Valentine Journey Section */}
+        <section className="py-16 px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="flex justify-center items-center gap-3 mb-4">
+                <div className="h-px w-8 bg-primary/30" />
+                <Heart className="w-5 h-5 text-primary" fill="currentColor" />
+                <div className="h-px w-8 bg-primary/30" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
+                Our Valentine Week Journey
+              </h2>
+              <p className="text-muted-foreground">
+                Tap through our special moments together
+              </p>
+            </div>
+            <ValentineJourney />
+          </div>
+        </section>
+
         {/* Quiz Section */}
         <section className="py-16 px-4 bg-secondary/30">
           <div className="max-w-3xl mx-auto">
@@ -121,26 +141,6 @@ export default function AnniversaryPage() {
             <div className="bg-card rounded-3xl p-6 md:p-10 shadow-lg border border-border">
               <LoveQuiz />
             </div>
-          </div>
-        </section>
-
-        {/* Valentine Journey Section */}
-        <section className="py-16 px-4">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-12">
-              <div className="flex justify-center items-center gap-3 mb-4">
-                <div className="h-px w-8 bg-primary/30" />
-                <Heart className="w-5 h-5 text-primary" fill="currentColor" />
-                <div className="h-px w-8 bg-primary/30" />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Our Valentine Week Journey
-              </h2>
-              <p className="text-muted-foreground">
-                Tap through our special moments together
-              </p>
-            </div>
-            <ValentineJourney />
           </div>
         </section>
 
@@ -172,9 +172,6 @@ export default function AnniversaryPage() {
               <span className="text-2xl text-primary">&</span>
               <span className="text-xl font-serif text-primary">Niral</span>
             </div>
-            <p className="mt-4 text-base opacity-70 italic font-serif">
-              &ldquo;Saat Janmon Ka Rishta&rdquo;
-            </p>
             <p className="mt-6 text-sm opacity-60">
               Made with love and devotion for our sacred journey together
             </p>
