@@ -50,14 +50,10 @@ export function PhotoGallery() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center">
               <div className="text-center p-4">
-                <Heart className="w-8 h-8 text-primary mx-auto mb-2 opacity-50" />
-                <p className="text-sm text-foreground/60 font-serif italic">{photo.placeholder}</p>
+                <Heart className="w-8 h-8 text-primary mx-auto opacity-50" />
               </div>
             </div>
             <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/20 transition-colors duration-300" />
-            <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-foreground/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <p className="text-card text-sm font-medium">{photo.caption}</p>
-            </div>
           </div>
         ))}
       </div>
@@ -76,11 +72,7 @@ export function PhotoGallery() {
           </button>
           <div className="max-w-3xl w-full aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center">
             <div className="text-center p-8">
-              <Heart className="w-16 h-16 text-primary mx-auto mb-4" />
-              <p className="text-xl text-foreground font-serif italic">
-                {photos[selectedPhoto].placeholder}
-              </p>
-              <p className="text-lg text-foreground/80 mt-2">{photos[selectedPhoto].caption}</p>
+              <Heart className="w-16 h-16 text-primary mx-auto" />
             </div>
           </div>
         </div>
