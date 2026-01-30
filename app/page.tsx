@@ -112,10 +112,10 @@ export default function AnniversaryPage() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Our Love Story Memory Game
+                Catch My Love
               </h2>
               <p className="text-muted-foreground">
-                Match the love phrases and complete our romantic story together
+                Catch the falling hearts and collect all my love for you
               </p>
             </div>
             <ReasonsILoveYou />

@@ -1,249 +1,361 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Heart, RotateCcw, Sparkles } from "lucide-react"
+import React from "react"
+
+import { useState, useEffect, useCallback, useRef } from "react"
+import { Heart, RotateCcw, Sparkles, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-interface Card {
+interface FallingHeart {
   id: number
-  pairId: number
-  content: string
-  type: "start" | "end"
-  isFlipped: boolean
-  isMatched: boolean
+  x: number
+  y: number
+  speed: number
+  size: number
+  type: "heart" | "golden" | "broken"
+  rotation: number
 }
 
-const lovePhrases = [
-  { start: "Tum Meri", end: "Jaan Ho" },
-  { start: "Dil Se", end: "Pyaar Hai" },
-  { start: "Hamesha", end: "Tumhare Saath" },
-  { start: "Saat Janam", end: "Ka Rishta" },
-  { start: "Meri", end: "Dhruvi" },
-  { start: "Forever", end: "Yours" },
+const loveMessages = [
+  "You make my heart smile",
+  "Forever isn't long enough with you",
+  "You are my today and tomorrow",
+  "Every love story is beautiful, but ours is my favorite",
+  "In your arms is my favorite place",
+  "You are the reason I believe in love",
+  "My heart beats only for you",
 ]
 
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
-
 export function ReasonsILoveYou() {
-  const [cards, setCards] = useState<Card[]>([])
-  const [flippedCards, setFlippedCards] = useState<number[]>([])
-  const [matchedPairs, setMatchedPairs] = useState<number>(0)
-  const [moves, setMoves] = useState<number>(0)
-  const [isChecking, setIsChecking] = useState(false)
-  const [showCelebration, setShowCelebration] = useState(false)
-  const [sparklePositions, setSparklePositions] = useState<{ x: number; y: number }[]>([])
+  const [score, setScore] = useState(0)
+  const [hearts, setHearts] = useState<FallingHeart[]>([])
+  const [gameActive, setGameActive] = useState(false)
+  const [gameOver, setGameOver] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(30)
+  const [catcherX, setCatcherX] = useState(50)
+  const [currentMessage, setCurrentMessage] = useState("")
+  const [showMessage, setShowMessage] = useState(false)
+  const [caughtAnimation, setCaughtAnimation] = useState<{ x: number; y: number } | null>(null)
+  const gameAreaRef = useRef<HTMLDivElement>(null)
+  const heartIdRef = useRef(0)
 
-  const initializeGame = useCallback(() => {
-    const cardPairs: Card[] = []
-    lovePhrases.forEach((phrase, index) => {
-      cardPairs.push({
-        id: index * 2,
-        pairId: index,
-        content: phrase.start,
-        type: "start",
-        isFlipped: false,
-        isMatched: false,
-      })
-      cardPairs.push({
-        id: index * 2 + 1,
-        pairId: index,
-        content: phrase.end,
-        type: "end",
-        isFlipped: false,
-        isMatched: false,
-      })
-    })
-    setCards(shuffleArray(cardPairs))
-    setFlippedCards([])
-    setMatchedPairs(0)
-    setMoves(0)
-    setShowCelebration(false)
+  const startGame = useCallback(() => {
+    setScore(0)
+    setHearts([])
+    setGameActive(true)
+    setGameOver(false)
+    setTimeLeft(30)
+    setCurrentMessage("")
+    setShowMessage(false)
   }, [])
 
+  // Timer countdown
   useEffect(() => {
-    initializeGame()
-  }, [initializeGame])
+    if (!gameActive || gameOver) return
+    
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setGameActive(false)
+          setGameOver(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
 
-  const handleCardClick = (cardId: number) => {
-    if (isChecking) return
-    const card = cards.find((c) => c.id === cardId)
-    if (!card || card.isFlipped || card.isMatched) return
-    if (flippedCards.length >= 2) return
+    return () => clearInterval(timer)
+  }, [gameActive, gameOver])
 
-    const newCards = cards.map((c) =>
-      c.id === cardId ? { ...c, isFlipped: true } : c
-    )
-    setCards(newCards)
+  // Spawn hearts
+  useEffect(() => {
+    if (!gameActive || gameOver) return
 
-    const newFlipped = [...flippedCards, cardId]
-    setFlippedCards(newFlipped)
+    const spawnInterval = setInterval(() => {
+      const random = Math.random()
+      let type: "heart" | "golden" | "broken" = "heart"
+      if (random > 0.9) type = "golden"
+      else if (random > 0.75) type = "broken"
 
-    if (newFlipped.length === 2) {
-      setMoves((m) => m + 1)
-      setIsChecking(true)
-
-      const [firstId, secondId] = newFlipped
-      const firstCard = newCards.find((c) => c.id === firstId)
-      const secondCard = newCards.find((c) => c.id === secondId)
-
-      if (firstCard && secondCard && firstCard.pairId === secondCard.pairId && firstCard.type !== secondCard.type) {
-        // Match found
-        setTimeout(() => {
-          setCards((prev) =>
-            prev.map((c) =>
-              c.pairId === firstCard.pairId ? { ...c, isMatched: true } : c
-            )
-          )
-          setMatchedPairs((m) => {
-            const newCount = m + 1
-            if (newCount === lovePhrases.length) {
-              setShowCelebration(true)
-              // Generate sparkle positions
-              const sparkles = Array.from({ length: 20 }, () => ({
-                x: Math.random() * 100,
-                y: Math.random() * 100,
-              }))
-              setSparklePositions(sparkles)
-            }
-            return newCount
-          })
-          setFlippedCards([])
-          setIsChecking(false)
-        }, 600)
-      } else {
-        // No match
-        setTimeout(() => {
-          setCards((prev) =>
-            prev.map((c) =>
-              newFlipped.includes(c.id) ? { ...c, isFlipped: false } : c
-            )
-          )
-          setFlippedCards([])
-          setIsChecking(false)
-        }, 1000)
+      const newHeart: FallingHeart = {
+        id: heartIdRef.current++,
+        x: Math.random() * 80 + 10,
+        y: -10,
+        speed: 1.5 + Math.random() * 2,
+        size: type === "golden" ? 36 : type === "broken" ? 24 : 28,
+        type,
+        rotation: Math.random() * 360,
       }
-    }
-  }
+      setHearts((prev) => [...prev, newHeart])
+    }, 600)
 
-  const isGameComplete = matchedPairs === lovePhrases.length
+    return () => clearInterval(spawnInterval)
+  }, [gameActive, gameOver])
+
+  // Move hearts down
+  useEffect(() => {
+    if (!gameActive || gameOver) return
+
+    const moveInterval = setInterval(() => {
+      setHearts((prev) => {
+        const updated = prev
+          .map((heart) => ({
+            ...heart,
+            y: heart.y + heart.speed,
+            rotation: heart.rotation + 2,
+          }))
+          .filter((heart) => heart.y < 110)
+        return updated
+      })
+    }, 50)
+
+    return () => clearInterval(moveInterval)
+  }, [gameActive, gameOver])
+
+  // Check collision with catcher
+  useEffect(() => {
+    if (!gameActive || gameOver) return
+
+    const catcherWidth = 80
+    const catcherY = 85
+
+    setHearts((prev) => {
+      let caught = false
+      let caughtHeart: FallingHeart | null = null
+      
+      const remaining = prev.filter((heart) => {
+        const heartCenterX = heart.x
+        const catcherLeft = catcherX - catcherWidth / 2
+        const catcherRight = catcherX + catcherWidth / 2
+
+        if (
+          heart.y >= catcherY - 8 &&
+          heart.y <= catcherY + 8 &&
+          heartCenterX >= catcherLeft &&
+          heartCenterX <= catcherRight
+        ) {
+          caught = true
+          caughtHeart = heart
+          return false
+        }
+        return true
+      })
+
+      if (caught && caughtHeart) {
+        const h = caughtHeart as FallingHeart
+        if (h.type === "golden") {
+          setScore((s) => s + 5)
+          const msg = loveMessages[Math.floor(Math.random() * loveMessages.length)]
+          setCurrentMessage(msg)
+          setShowMessage(true)
+          setTimeout(() => setShowMessage(false), 2000)
+        } else if (h.type === "broken") {
+          setScore((s) => Math.max(0, s - 2))
+        } else {
+          setScore((s) => s + 1)
+        }
+        setCaughtAnimation({ x: catcherX, y: catcherY })
+        setTimeout(() => setCaughtAnimation(null), 300)
+      }
+
+      return remaining
+    })
+  }, [hearts, catcherX, gameActive, gameOver])
+
+  // Touch/Mouse controls
+  const handleMove = useCallback(
+    (clientX: number) => {
+      if (!gameAreaRef.current || !gameActive) return
+      const rect = gameAreaRef.current.getBoundingClientRect()
+      const x = ((clientX - rect.left) / rect.width) * 100
+      setCatcherX(Math.max(10, Math.min(90, x)))
+    },
+    [gameActive]
+  )
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault()
+      handleMove(e.touches[0].clientX)
+    },
+    [handleMove]
+  )
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      handleMove(e.clientX)
+    },
+    [handleMove]
+  )
+
+  const getFinalMessage = () => {
+    if (score >= 50) return "You caught all my love! We are soulmates!"
+    if (score >= 30) return "Amazing! Our love connection is strong!"
+    if (score >= 15) return "Beautiful! You have my heart!"
+    return "Keep trying, my love awaits you!"
+  }
 
   return (
     <div className="relative">
-      <div className="bg-card rounded-3xl p-6 md:p-8 shadow-xl border border-border overflow-hidden">
+      <div className="bg-card rounded-3xl p-4 md:p-6 shadow-xl border border-border overflow-hidden">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
 
-        {/* Header */}
-        <div className="relative text-center mb-6">
-          <h3 className="font-serif text-xl md:text-2xl text-foreground mb-2">
-            Match Our Love Phrases
-          </h3>
-          <p className="text-muted-foreground text-sm">
-            Find the matching pairs to complete our love story
-          </p>
-          <div className="flex justify-center gap-6 mt-4 text-sm">
-            <span className="text-muted-foreground">
-              Moves: <span className="text-primary font-semibold">{moves}</span>
-            </span>
-            <span className="text-muted-foreground">
-              Matched: <span className="text-primary font-semibold">{matchedPairs}/{lovePhrases.length}</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Game Grid */}
-        <div className="relative grid grid-cols-3 md:grid-cols-4 gap-3 md:gap-4">
-          {cards.map((card) => (
-            <button
-              key={card.id}
-              onClick={() => handleCardClick(card.id)}
-              disabled={card.isFlipped || card.isMatched || isChecking}
-              className="relative aspect-[3/4] perspective-1000"
+        {!gameActive && !gameOver && (
+          <div className="relative text-center py-8">
+            <div className="mb-6">
+              <Heart className="w-16 h-16 text-primary mx-auto animate-pulse" fill="currentColor" />
+            </div>
+            <h3 className="font-serif text-xl md:text-2xl text-foreground mb-3">
+              Catch My Love
+            </h3>
+            <p className="text-muted-foreground text-sm mb-2 max-w-xs mx-auto">
+              Catch the falling hearts! Golden hearts give bonus points and reveal love messages.
+            </p>
+            <p className="text-muted-foreground text-xs mb-6">
+              Avoid broken hearts - they take away points!
+            </p>
+            <div className="flex justify-center gap-4 mb-6 text-xs">
+              <div className="flex items-center gap-1">
+                <Heart className="w-4 h-4 text-primary" fill="currentColor" />
+                <span className="text-muted-foreground">+1</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Star className="w-4 h-4 text-yellow-500" fill="currentColor" />
+                <span className="text-muted-foreground">+5</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Heart className="w-4 h-4 text-muted-foreground/50" />
+                <span className="text-muted-foreground">-2</span>
+              </div>
+            </div>
+            <Button
+              onClick={startGame}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 text-base"
             >
-              <div
-                className={`relative w-full h-full transition-transform duration-500 transform-style-3d ${
-                  card.isFlipped || card.isMatched ? "rotate-y-180" : ""
-                }`}
-              >
-                {/* Card Back */}
-                <div
-                  className={`absolute inset-0 rounded-xl flex items-center justify-center backface-hidden ${
-                    card.isMatched
-                      ? "bg-primary/20"
-                      : "bg-gradient-to-br from-primary/80 to-primary cursor-pointer hover:from-primary hover:to-primary/90 hover:scale-105"
-                  } transition-all duration-300 shadow-lg border border-primary/20`}
-                >
-                  <Heart
-                    className={`w-8 h-8 md:w-10 md:h-10 ${
-                      card.isMatched ? "text-primary/40" : "text-primary-foreground"
-                    }`}
-                    fill="currentColor"
-                  />
-                </div>
+              <Heart className="w-4 h-4 mr-2" fill="currentColor" />
+              Start Game
+            </Button>
+          </div>
+        )}
 
-                {/* Card Front */}
+        {gameActive && (
+          <>
+            {/* Score and Timer */}
+            <div className="relative flex justify-between items-center mb-3 px-2">
+              <div className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-primary" fill="currentColor" />
+                <span className="font-semibold text-foreground text-lg">{score}</span>
+              </div>
+              <div className={`font-semibold text-lg ${timeLeft <= 10 ? "text-destructive animate-pulse" : "text-foreground"}`}>
+                {timeLeft}s
+              </div>
+            </div>
+
+            {/* Love Message Display */}
+            {showMessage && (
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-primary/90 text-primary-foreground px-4 py-2 rounded-full text-sm font-medium animate-bounce whitespace-nowrap">
+                {currentMessage}
+              </div>
+            )}
+
+            {/* Game Area */}
+            <div
+              ref={gameAreaRef}
+              className="relative h-[50vh] min-h-[300px] max-h-[400px] bg-gradient-to-b from-accent/10 to-primary/10 rounded-2xl overflow-hidden touch-none cursor-none"
+              onMouseMove={handleMouseMove}
+              onTouchMove={handleTouchMove}
+            >
+              {/* Falling Hearts */}
+              {hearts.map((heart) => (
                 <div
-                  className={`absolute inset-0 rounded-xl flex items-center justify-center p-2 backface-hidden rotate-y-180 ${
-                    card.isMatched
-                      ? "bg-gradient-to-br from-accent/40 to-primary/30 border-primary/40"
-                      : "bg-card border-primary/30"
-                  } border-2 shadow-lg`}
+                  key={heart.id}
+                  className="absolute transition-none pointer-events-none"
+                  style={{
+                    left: `${heart.x}%`,
+                    top: `${heart.y}%`,
+                    transform: `translate(-50%, -50%) rotate(${heart.rotation}deg)`,
+                  }}
                 >
-                  <span
-                    className={`font-serif text-sm md:text-base text-center leading-tight ${
-                      card.isMatched ? "text-primary" : "text-foreground"
-                    }`}
-                  >
-                    {card.content}
-                  </span>
-                  {card.isMatched && (
-                    <Sparkles className="absolute top-2 right-2 w-4 h-4 text-primary animate-pulse" />
+                  {heart.type === "golden" ? (
+                    <Star
+                      className="text-yellow-500 drop-shadow-lg"
+                      style={{ width: heart.size, height: heart.size }}
+                      fill="currentColor"
+                    />
+                  ) : heart.type === "broken" ? (
+                    <Heart
+                      className="text-muted-foreground/50"
+                      style={{ width: heart.size, height: heart.size }}
+                    />
+                  ) : (
+                    <Heart
+                      className="text-primary drop-shadow-md"
+                      style={{ width: heart.size, height: heart.size }}
+                      fill="currentColor"
+                    />
                   )}
                 </div>
-              </div>
-            </button>
-          ))}
+              ))}
 
-          {/* Celebration sparkles */}
-          {showCelebration &&
-            sparklePositions.map((pos, i) => (
+              {/* Caught Animation */}
+              {caughtAnimation && (
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: `${caughtAnimation.x}%`,
+                    top: `${caughtAnimation.y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  <Sparkles className="w-8 h-8 text-primary animate-ping" />
+                </div>
+              )}
+
+              {/* Catcher */}
               <div
-                key={i}
-                className="absolute pointer-events-none animate-sparkle-float"
-                style={{
-                  left: `${pos.x}%`,
-                  top: `${pos.y}%`,
-                  animationDelay: `${i * 0.1}s`,
-                }}
+                className="absolute bottom-[12%] transition-all duration-75 ease-out"
+                style={{ left: `${catcherX}%`, transform: "translateX(-50%)" }}
               >
-                <Sparkles className="w-4 h-4 text-primary" />
+                <div className="relative">
+                  {/* Basket/Catcher */}
+                  <div className="w-20 h-10 bg-gradient-to-b from-primary to-primary/80 rounded-b-3xl rounded-t-lg border-2 border-primary-foreground/20 shadow-lg flex items-center justify-center">
+                    <Heart className="w-5 h-5 text-primary-foreground" fill="currentColor" />
+                  </div>
+                  {/* Glow effect */}
+                  <div className="absolute -inset-2 bg-primary/20 rounded-full blur-md -z-10" />
+                </div>
               </div>
-            ))}
-        </div>
 
-        {/* Game Complete Message */}
-        {isGameComplete && (
-          <div className="relative mt-8 text-center animate-fade-in">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <Heart className="w-6 h-6 text-primary animate-pulse" fill="currentColor" />
-              <span className="font-serif text-xl text-primary">Perfect Match!</span>
-              <Heart className="w-6 h-6 text-primary animate-pulse" fill="currentColor" />
+              {/* Touch instruction */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-muted-foreground/60">
+                Move finger or mouse to catch hearts
+              </div>
             </div>
-            <p className="text-muted-foreground mb-4">
-              Just like us... we are meant to be together forever
-            </p>
-            <p className="text-sm text-foreground/70 mb-6">
-              Completed in {moves} moves
+          </>
+        )}
+
+        {gameOver && (
+          <div className="relative text-center py-8 animate-fade-in">
+            <div className="mb-4">
+              {score >= 30 ? (
+                <div className="relative inline-block">
+                  <Heart className="w-16 h-16 text-primary animate-pulse" fill="currentColor" />
+                  <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-500" />
+                </div>
+              ) : (
+                <Heart className="w-16 h-16 text-primary mx-auto" fill="currentColor" />
+              )}
+            </div>
+            <h3 className="font-serif text-xl md:text-2xl text-foreground mb-2">
+              Game Over!
+            </h3>
+            <p className="text-3xl font-bold text-primary mb-3">{score} Hearts</p>
+            <p className="text-muted-foreground text-sm mb-6 max-w-xs mx-auto">
+              {getFinalMessage()}
             </p>
             <Button
-              onClick={initializeGame}
+              onClick={startGame}
               variant="outline"
               className="border-primary/50 text-primary hover:bg-primary/10 bg-transparent"
             >
@@ -252,36 +364,9 @@ export function ReasonsILoveYou() {
             </Button>
           </div>
         )}
-
-        {/* Reset button when game is in progress */}
-        {!isGameComplete && moves > 0 && (
-          <div className="relative mt-6 text-center">
-            <Button
-              onClick={initializeGame}
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-primary"
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Start Over
-            </Button>
-          </div>
-        )}
       </div>
 
       <style jsx>{`
-        .perspective-1000 {
-          perspective: 1000px;
-        }
-        .transform-style-3d {
-          transform-style: preserve-3d;
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
         @keyframes fade-in {
           from {
             opacity: 0;
@@ -292,25 +377,8 @@ export function ReasonsILoveYou() {
             transform: translateY(0);
           }
         }
-        @keyframes sparkle-float {
-          0% {
-            opacity: 0;
-            transform: scale(0) rotate(0deg);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1) rotate(180deg);
-          }
-          100% {
-            opacity: 0;
-            transform: scale(0) rotate(360deg) translateY(-20px);
-          }
-        }
         .animate-fade-in {
           animation: fade-in 0.6s ease-out forwards;
-        }
-        .animate-sparkle-float {
-          animation: sparkle-float 1.5s ease-out forwards;
         }
       `}</style>
     </div>
