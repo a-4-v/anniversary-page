@@ -1,322 +1,304 @@
 "use client"
 
-import React from "react"
-
-import { useState, useRef, useEffect, useCallback } from "react"
-import { Heart, Sparkles, RefreshCw } from "lucide-react"
+import { useState } from "react"
+import { Heart, Sparkles, ArrowRight, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-interface LoveCard {
+interface LoveLetter {
   id: number
-  message: string
-  subtext: string
-  revealed: boolean
+  startWord: string
+  options: string[]
+  correctIndex: number
+  fullSentence: string
 }
 
-const loveMessages = [
-  { message: "I Promise", subtext: "To love you more each day" },
-  { message: "You Are", subtext: "The best thing in my life" },
-  { message: "Forever", subtext: "Is not long enough with you" },
-  { message: "My Heart", subtext: "Beats only for you" },
-  { message: "Together", subtext: "We can conquer anything" },
-  { message: "You Make", subtext: "Every moment magical" },
+const loveLetters: LoveLetter[] = [
+  {
+    id: 1,
+    startWord: "Tum mere liye...",
+    options: ["timepass ho", "sab kuch ho", "friend ho"],
+    correctIndex: 1,
+    fullSentence: "Tum mere liye sab kuch ho",
+  },
+  {
+    id: 2,
+    startWord: "Main tumse...",
+    options: ["kabhi kabhi", "har pal", "thoda thoda"],
+    correctIndex: 1,
+    fullSentence: "Main tumse har pal pyaar karta hoon",
+  },
+  {
+    id: 3,
+    startWord: "Tumhari smile...",
+    options: ["theek hai", "mera din bana deti hai", "normal hai"],
+    correctIndex: 1,
+    fullSentence: "Tumhari smile mera din bana deti hai",
+  },
+  {
+    id: 4,
+    startWord: "Tumhare bina...",
+    options: ["chal jayega", "zindagi adhuri hai", "koi baat nahi"],
+    correctIndex: 1,
+    fullSentence: "Tumhare bina zindagi adhuri hai",
+  },
+  {
+    id: 5,
+    startWord: "Hamesha tumhare saath...",
+    options: ["shayad rahoon", "rehna chahta hoon", "dekhenge"],
+    correctIndex: 1,
+    fullSentence: "Hamesha tumhare saath rehna chahta hoon",
+  },
 ]
 
 export function ReasonsILoveYou() {
-  const [cards, setCards] = useState<LoveCard[]>([])
-  const [allRevealed, setAllRevealed] = useState(false)
-  const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([])
-  const isDrawing = useRef<boolean[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [selectedOption, setSelectedOption] = useState<number | null>(null)
+  const [showResult, setShowResult] = useState(false)
+  const [score, setScore] = useState(0)
+  const [completedLetters, setCompletedLetters] = useState<string[]>([])
+  const [isComplete, setIsComplete] = useState(false)
+  const [shake, setShake] = useState(false)
 
-  const initializeCards = useCallback(() => {
-    const shuffled = [...loveMessages].sort(() => Math.random() - 0.5)
-    setCards(
-      shuffled.map((msg, i) => ({
-        id: i,
-        message: msg.message,
-        subtext: msg.subtext,
-        revealed: false,
-      }))
-    )
-    setAllRevealed(false)
-    isDrawing.current = new Array(6).fill(false)
-    
-    // Reset canvases
-    setTimeout(() => {
-      canvasRefs.current.forEach((canvas) => {
-        if (canvas) {
-          const ctx = canvas.getContext("2d")
-          if (ctx) {
-            ctx.globalCompositeOperation = "source-over"
-            drawScratchLayer(ctx, canvas.width, canvas.height)
+  const currentLetter = loveLetters[currentIndex]
+
+  const handleSelect = (optionIndex: number) => {
+    if (showResult) return
+    setSelectedOption(optionIndex)
+    setShowResult(true)
+
+    if (optionIndex === currentLetter.correctIndex) {
+      setScore((prev) => prev + 1)
+      setCompletedLetters((prev) => [...prev, currentLetter.fullSentence])
+    } else {
+      setShake(true)
+      setTimeout(() => setShake(false), 500)
+      // Still add the correct sentence to the love letter
+      setCompletedLetters((prev) => [...prev, currentLetter.fullSentence])
+    }
+  }
+
+  const handleNext = () => {
+    if (currentIndex < loveLetters.length - 1) {
+      setCurrentIndex((prev) => prev + 1)
+      setSelectedOption(null)
+      setShowResult(false)
+    } else {
+      setIsComplete(true)
+    }
+  }
+
+  const resetGame = () => {
+    setCurrentIndex(0)
+    setSelectedOption(null)
+    setShowResult(false)
+    setScore(0)
+    setCompletedLetters([])
+    setIsComplete(false)
+  }
+
+  if (isComplete) {
+    return (
+      <div className="w-full">
+        {/* Completed Love Letter */}
+        <div className="bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 rounded-2xl p-5 md:p-8 border border-primary/20 shadow-lg">
+          <div className="flex justify-center mb-4">
+            <div className="flex gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Sparkles
+                  key={i}
+                  className="w-4 h-4 text-primary animate-pulse"
+                  style={{ animationDelay: `${i * 0.15}s` }}
+                />
+              ))}
+            </div>
+          </div>
+          
+          <h3 className="text-xl md:text-2xl font-serif text-center text-primary mb-4">
+            My Love Letter To You
+          </h3>
+          
+          <div className="bg-card/80 rounded-xl p-4 md:p-6 mb-5 border border-primary/10">
+            <p className="text-sm md:text-base text-muted-foreground mb-3 italic">Dear Dhruvi,</p>
+            <div className="space-y-2">
+              {completedLetters.map((sentence, i) => (
+                <p
+                  key={i}
+                  className="text-sm md:text-base text-foreground font-serif leading-relaxed animate-fade-in"
+                  style={{ animationDelay: `${i * 0.2}s` }}
+                >
+                  {sentence}
+                  {i < completedLetters.length - 1 ? "." : "..."}
+                </p>
+              ))}
+            </div>
+            <p className="text-sm md:text-base text-muted-foreground mt-4 italic text-right">
+              Forever Yours, Niral
+            </p>
+          </div>
+
+          <div className="text-center mb-5">
+            <p className="text-sm text-muted-foreground">
+              You completed the love letter with{" "}
+              <span className="text-primary font-bold">{score}/{loveLetters.length}</span>{" "}
+              correct choices
+            </p>
+            {score === loveLetters.length && (
+              <p className="text-primary font-serif mt-2 text-base">
+                Perfect! You know my heart completely!
+              </p>
+            )}
+          </div>
+
+          <div className="flex justify-center">
+            <Button
+              onClick={resetGame}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Write Again
+            </Button>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes fade-in {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
           }
-        }
-      })
-    }, 50)
-  }, [])
-
-  const drawScratchLayer = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const gradient = ctx.createLinearGradient(0, 0, width, height)
-    gradient.addColorStop(0, "#be185d")
-    gradient.addColorStop(0.5, "#ec4899")
-    gradient.addColorStop(1, "#f472b6")
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, width, height)
-
-    // Add sparkle dots
-    ctx.fillStyle = "rgba(255, 255, 255, 0.15)"
-    for (let i = 0; i < 15; i++) {
-      const x = Math.random() * width
-      const y = Math.random() * height
-      const size = Math.random() * 3 + 1
-      ctx.beginPath()
-      ctx.arc(x, y, size, 0, Math.PI * 2)
-      ctx.fill()
-    }
-
-    // Text
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)"
-    ctx.font = "bold 13px sans-serif"
-    ctx.textAlign = "center"
-    ctx.fillText("Scratch Here", width / 2, height / 2 - 3)
-    ctx.font = "11px sans-serif"
-    ctx.fillStyle = "rgba(255, 255, 255, 0.7)"
-    ctx.fillText("to reveal", width / 2, height / 2 + 12)
+          .animate-fade-in {
+            animation: fade-in 0.4s ease-out forwards;
+            opacity: 0;
+          }
+        `}</style>
+      </div>
+    )
   }
-
-  useEffect(() => {
-    initializeCards()
-  }, [initializeCards])
-
-  useEffect(() => {
-    canvasRefs.current.forEach((canvas, index) => {
-      if (canvas && !cards[index]?.revealed) {
-        const ctx = canvas.getContext("2d")
-        if (ctx) {
-          drawScratchLayer(ctx, canvas.width, canvas.height)
-        }
-      }
-    })
-  }, [cards.length])
-
-  const scratch = (
-    canvas: HTMLCanvasElement,
-    x: number,
-    y: number,
-    cardIndex: number
-  ) => {
-    const ctx = canvas.getContext("2d")
-    if (ctx && !cards[cardIndex]?.revealed) {
-      ctx.globalCompositeOperation = "destination-out"
-      ctx.beginPath()
-      ctx.arc(x, y, 22, 0, Math.PI * 2)
-      ctx.fill()
-
-      // Check reveal progress
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-      let transparent = 0
-      for (let i = 3; i < imageData.data.length; i += 4) {
-        if (imageData.data[i] === 0) transparent++
-      }
-      const progress = (transparent / (imageData.data.length / 4)) * 100
-
-      if (progress > 45) {
-        setCards((prev) =>
-          prev.map((card, i) =>
-            i === cardIndex ? { ...card, revealed: true } : card
-          )
-        )
-      }
-    }
-  }
-
-  const getPosition = (
-    e: React.TouchEvent | React.MouseEvent,
-    canvas: HTMLCanvasElement
-  ) => {
-    const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    
-    if ("touches" in e) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
-      }
-    }
-    return {
-      x: ((e as React.MouseEvent).clientX - rect.left) * scaleX,
-      y: ((e as React.MouseEvent).clientY - rect.top) * scaleY,
-    }
-  }
-
-  const handleStart = (e: React.TouchEvent | React.MouseEvent, index: number) => {
-    isDrawing.current[index] = true
-    const canvas = canvasRefs.current[index]
-    if (canvas && !cards[index]?.revealed) {
-      const pos = getPosition(e, canvas)
-      scratch(canvas, pos.x, pos.y, index)
-    }
-  }
-
-  const handleEnd = (index: number) => {
-    isDrawing.current[index] = false
-  }
-
-  const handleMove = (
-    e: React.TouchEvent | React.MouseEvent,
-    index: number
-  ) => {
-    if (!isDrawing.current[index]) return
-    const canvas = canvasRefs.current[index]
-    if (canvas && !cards[index]?.revealed) {
-      const pos = getPosition(e, canvas)
-      scratch(canvas, pos.x, pos.y, index)
-    }
-  }
-
-  useEffect(() => {
-    const revealedCount = cards.filter((c) => c.revealed).length
-    if (revealedCount === cards.length && cards.length > 0) {
-      setAllRevealed(true)
-    }
-  }, [cards])
-
-  const revealedCount = cards.filter((c) => c.revealed).length
 
   return (
     <div className="w-full">
-      {/* Cards Grid - 2 columns for mobile */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        {cards.map((card, index) => (
-          <div
-            key={card.id}
-            className={`relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border-2 transition-all duration-300 ${
-              card.revealed ? "border-primary/40 scale-[1.02]" : "border-transparent"
-            }`}
-          >
-            {/* Revealed Content */}
-            <div className="absolute inset-0 bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 flex flex-col items-center justify-center p-3 text-center">
-              <Heart
-                className={`w-6 h-6 text-primary mb-1.5 ${
-                  card.revealed ? "animate-pulse" : "opacity-30"
-                }`}
-                fill="currentColor"
-              />
-              <p className="text-sm md:text-base font-serif font-bold text-primary leading-tight">
-                {card.message}
-              </p>
-              <p className="text-[11px] md:text-xs text-muted-foreground mt-1 leading-tight px-1">
-                {card.subtext}
-              </p>
-            </div>
-
-            {/* Scratch Layer */}
-            {!card.revealed && (
-              <canvas
-                ref={(el) => {
-                  canvasRefs.current[index] = el
-                }}
-                width={180}
-                height={135}
-                className="absolute inset-0 w-full h-full cursor-pointer touch-none"
-                onMouseDown={(e) => handleStart(e, index)}
-                onMouseUp={() => handleEnd(index)}
-                onMouseLeave={() => handleEnd(index)}
-                onMouseMove={(e) => handleMove(e, index)}
-                onTouchStart={(e) => handleStart(e, index)}
-                onTouchEnd={() => handleEnd(index)}
-                onTouchMove={(e) => handleMove(e, index)}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Progress Bar */}
-      <div className="mb-4">
+      {/* Progress */}
+      <div className="mb-5">
         <div className="flex justify-between items-center mb-2">
-          <p className="text-xs text-muted-foreground">Love notes revealed</p>
+          <p className="text-xs text-muted-foreground">Writing love letter</p>
           <p className="text-xs font-medium text-primary">
-            {revealedCount} / {cards.length}
+            {currentIndex + 1} / {loveLetters.length}
           </p>
         </div>
         <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-primary to-pink-400 rounded-full transition-all duration-500 ease-out"
-            style={{
-              width: `${(revealedCount / cards.length) * 100}%`,
-            }}
+            className="h-full bg-gradient-to-r from-primary to-pink-400 rounded-full transition-all duration-500"
+            style={{ width: `${((currentIndex + 1) / loveLetters.length) * 100}%` }}
           />
         </div>
       </div>
 
-      {/* Completion Message */}
-      {allRevealed && (
-        <div
-          className="text-center py-5 px-4 bg-gradient-to-r from-pink-50 via-rose-50 to-pink-50 rounded-2xl border border-primary/20 animate-fade-in"
-        >
-          <div className="flex justify-center gap-1 mb-3">
-            {[...Array(5)].map((_, i) => (
-              <Sparkles
-                key={i}
-                className="w-4 h-4 text-primary animate-sparkle"
-                style={{
-                  animationDelay: `${i * 0.1}s`,
-                }}
-              />
-            ))}
+      {/* Current Letter Prompt */}
+      <div
+        className={`bg-gradient-to-br from-pink-50 via-rose-50 to-pink-100 rounded-2xl p-5 md:p-6 border border-primary/20 shadow-lg mb-4 ${
+          shake ? "animate-shake" : ""
+        }`}
+      >
+        <div className="flex justify-center mb-4">
+          <Heart className="w-8 h-8 text-primary animate-pulse" fill="currentColor" />
+        </div>
+
+        <p className="text-lg md:text-xl font-serif text-center text-foreground mb-5">
+          {currentLetter.startWord}
+        </p>
+
+        {/* Options */}
+        <div className="space-y-3">
+          {currentLetter.options.map((option, index) => {
+            const isCorrect = index === currentLetter.correctIndex
+            const isSelected = selectedOption === index
+            
+            let buttonClass = "w-full py-3.5 px-4 rounded-xl border-2 text-sm md:text-base font-medium transition-all duration-300 "
+            
+            if (showResult) {
+              if (isCorrect) {
+                buttonClass += "border-green-500 bg-green-50 text-green-700"
+              } else if (isSelected && !isCorrect) {
+                buttonClass += "border-red-400 bg-red-50 text-red-600"
+              } else {
+                buttonClass += "border-muted bg-muted/50 text-muted-foreground opacity-50"
+              }
+            } else {
+              buttonClass += "border-primary/20 bg-card hover:border-primary hover:bg-primary/5 text-foreground active:scale-[0.98]"
+            }
+
+            return (
+              <button
+                key={index}
+                onClick={() => handleSelect(index)}
+                disabled={showResult}
+                className={buttonClass}
+              >
+                {option}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Result Message */}
+        {showResult && (
+          <div className="mt-5 text-center animate-fade-in">
+            {selectedOption === currentLetter.correctIndex ? (
+              <p className="text-green-600 font-medium text-sm">
+                Yes! You know what is in my heart!
+              </p>
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                The right words are: <span className="text-primary font-medium">{currentLetter.options[currentLetter.correctIndex]}</span>
+              </p>
+            )}
           </div>
-          <p className="text-base md:text-lg font-serif text-primary mb-1">
-            You revealed all my love!
-          </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            Every word is a promise from my heart to yours
-          </p>
+        )}
+      </div>
+
+      {/* Next Button */}
+      {showResult && (
+        <div className="flex justify-center animate-fade-in">
           <Button
-            onClick={initializeCards}
-            variant="outline"
-            className="border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground bg-transparent text-sm"
+            onClick={handleNext}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
-            <RefreshCw className="w-3.5 h-3.5 mr-2" />
-            Play Again
+            {currentIndex < loveLetters.length - 1 ? (
+              <>
+                Next Line
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            ) : (
+              <>
+                See Complete Letter
+                <Heart className="w-4 h-4 ml-2" fill="currentColor" />
+              </>
+            )}
           </Button>
         </div>
       )}
 
       {/* Instructions */}
-      {!allRevealed && (
-        <p className="text-center text-[11px] text-muted-foreground">
-          Use your finger to scratch each card and reveal my love notes
+      {!showResult && (
+        <p className="text-center text-xs text-muted-foreground mt-4">
+          Complete the sentence by choosing the right words from my heart
         </p>
       )}
 
       <style jsx>{`
         @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(5px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in {
-          animation: fade-in 0.5s ease-out forwards;
+          animation: fade-in 0.3s ease-out forwards;
         }
-        @keyframes sparkle {
-          0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.5;
-            transform: scale(0.8);
-          }
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
         }
-        .animate-sparkle {
-          animation: sparkle 1s ease-in-out infinite;
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
         }
       `}</style>
     </div>

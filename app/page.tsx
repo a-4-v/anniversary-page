@@ -112,10 +112,10 @@ export default function AnniversaryPage() {
                 <div className="h-px w-8 bg-primary/30" />
               </div>
               <h2 className="text-2xl md:text-3xl font-serif text-foreground mb-2">
-                Scratch & Reveal My Love
+                Complete My Love Letter
               </h2>
               <p className="text-muted-foreground">
-                Scratch each card to reveal the love notes I wrote for you
+                Choose the right words to complete the letter I wrote for you
               </p>
             </div>
             <ReasonsILoveYou />
@@ -161,11 +161,11 @@ export default function AnniversaryPage() {
               {'"From five beautiful years... to seven sacred vows around the holy fire"'}
             </p>
             <p className="text-lg md:text-xl opacity-80 max-w-xl mx-auto leading-relaxed">
-              Today we celebrate 1,825 days of loving you. Soon, we will take our Saat Phere 
-              around the Agni, and with each sacred step, I will promise you my love for 
-              this life and the next seven lifetimes. You are my Ardhangini &mdash; the other 
-              half of my soul. Until we are bound by the sacred thread of marriage, 
-              and for all eternity after &mdash; Tum Meri Ho, Hamesha Ke Liye.
+              Soon, we will take our Saat Phere around the Agni, and with each sacred step, 
+              I will promise you my love for this life and the next seven lifetimes. 
+              You are my Ardhangini &mdash; the other half of my soul. Until we are bound 
+              by the sacred thread of marriage, and for all eternity after &mdash; 
+              Tum Meri Ho, Hamesha Ke Liye.
             </p>
             <div className="mt-8 flex items-center justify-center gap-3">
               <span className="text-xl font-serif text-primary">Dhruvi</span>
